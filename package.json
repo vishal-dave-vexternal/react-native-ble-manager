@@ -1,15 +1,11 @@
 {
-  "name": "@piri/react-native-ble-manager",
-  "version": "7.6.3",
+  "name": "@viral-piri/react-native-ble-manager",
+  "version": "1.0.1",
   "description": "A BLE module for react native.",
   "main": "BleManager",
   "types": "./index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/innoveit/react-native-ble-manager.git"
-  },
   "bugs": {
-    "url": "https://github.com/innoveit/react-native-ble-manager/issues"
+    "url": "https://github.com/viral-piri/react-native-ble-manager/issues"
   },
   "keywords": [
     "react-native",
@@ -20,9 +16,13 @@
     "low energy"
   ],
   "license": "Apache-2.0",
+  "repository": "https://github.com/viral-piri/react-native-ble-manager.git",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
   "author": {
-    "name": "Innove",
-    "url": "https://github.com/innoveit"
+    "name": "piri",
+    "url": "https://github.com/viral-piri"
   },
   "scripts": {
     "version": "git add -A",
