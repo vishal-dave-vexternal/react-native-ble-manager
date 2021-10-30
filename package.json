@@ -1,5 +1,5 @@
 {
-  "name": "react-native-ble-manager",
+  "name": "@piri/react-native-ble-manager",
   "version": "7.6.3",
   "description": "A BLE module for react native.",
   "main": "BleManager",

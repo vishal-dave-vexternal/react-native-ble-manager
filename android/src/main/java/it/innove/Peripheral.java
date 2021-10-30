@@ -21,6 +21,7 @@ import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.common.StandardCharsets;
 import com.facebook.react.modules.core.RCTNativeAppEventEmitter;
 
 import org.json.JSONException;
@@ -357,6 +358,8 @@ public class Peripheral extends BluetoothGattCallback {
 			map.putString("characteristic", charString);
 			map.putString("service", service);
 			map.putArray("value", BleManager.bytesToWritableArray(dataValue));
+			map.putString("hexValue", BleManager.bytesToHex(dataValue));
+			map.putString("stringValue", new String(dataValue, StandardCharsets.UTF_8));
 			sendEvent("BleManagerDidUpdateValueForCharacteristic", map);
 
 		} catch (Exception e) {
@@ -482,14 +485,14 @@ public class Peripheral extends BluetoothGattCallback {
 						.getDescriptor(UUIDHelper.uuidFromString(CHARACTERISTIC_NOTIFICATION_CONFIG));
 				if (descriptor != null) {
 
-					// Prefer notify over indicate
-					if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0) {
-						Log.d(BleManager.LOG_TAG, "Characteristic " + characteristicUUID + " set NOTIFY");
-						descriptor.setValue(notify ? BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-								: BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
-					} else if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0) {
+					// Prefer indicate over notify
+					if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0) {
 						Log.d(BleManager.LOG_TAG, "Characteristic " + characteristicUUID + " set INDICATE");
 						descriptor.setValue(notify ? BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
+								: BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
+					} else if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0) {
+						Log.d(BleManager.LOG_TAG, "Characteristic " + characteristicUUID + " set NOTIFY");
+						descriptor.setValue(notify ? BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
 								: BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
 					} else {
 						Log.d(BleManager.LOG_TAG, "Characteristic " + characteristicUUID
@@ -544,8 +547,17 @@ public class Peripheral extends BluetoothGattCallback {
 			UUID characteristicUUID) {
 
 		try {
-			// Check for Notify first
+
 			List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
+			// Check for Indicate first
+			for (BluetoothGattCharacteristic characteristic : characteristics) {
+				if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0
+						&& characteristicUUID.equals(characteristic.getUuid())) {
+					return characteristic;
+				}
+			}
+
+			// If there wasn't Indicate Characteristic, check for Notify
 			for (BluetoothGattCharacteristic characteristic : characteristics) {
 				if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0
 						&& characteristicUUID.equals(characteristic.getUuid())) {
@@ -553,13 +565,6 @@ public class Peripheral extends BluetoothGattCallback {
 				}
 			}
 
-			// If there wasn't Notify Characteristic, check for Indicate
-			for (BluetoothGattCharacteristic characteristic : characteristics) {
-				if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0
-						&& characteristicUUID.equals(characteristic.getUuid())) {
-					return characteristic;
-				}
-			}
 
 			// As a last resort, try and find ANY characteristic with this UUID, even if it
 			// doesn't have the correct properties
