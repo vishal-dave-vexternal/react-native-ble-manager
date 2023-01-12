@@ -177,6 +177,17 @@ class BleManager extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void setBluetoothState(boolean enabled) {
+        if  (getBluetoothAdapter() != null) {
+            if (enabled) {
+                getBluetoothAdapter().enable();
+            } else {
+                getBluetoothAdapter().disable();
+            }
+        }
+    }
+
+    @ReactMethod
     public void scan(ReadableArray serviceUUIDs, final int scanSeconds, boolean allowDuplicates, ReadableMap options,
                      Callback callback) {
         Log.d(LOG_TAG, "scan");

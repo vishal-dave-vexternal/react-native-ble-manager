@@ -160,4 +160,6 @@ declare module "react-native-ble-manager" {
     peripheralID: string,
     serviceUUIDs?: string[]
   ): Promise<PeripheralInfo>;
+
+  export function enable(enabled: boolean): Promise<void>;
 }

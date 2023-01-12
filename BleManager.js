@@ -167,6 +167,12 @@ class BleManager {
     });
   }
 
+  enable(enabled = true) {
+      if (React.Platform.OS === "android") {
+          bleManager.setBluetoothState(enabled);
+      }
+  }
+
   startNotification(peripheralId, serviceUUID, characteristicUUID) {
     return new Promise((fulfill, reject) => {
       bleManager.startNotification(
